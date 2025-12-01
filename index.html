@@ -5,19 +5,86 @@
   <meta charset="UTF-8" />
   <title>ParfumDEPO Miniapp</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 10px; max-width: 600px; margin: auto; }
-    h1 { text-align: center; }
-    input[type="text"] { width: 100%; padding: 8px; font-size: 16px; margin-bottom: 10px; }
-    button { padding: 8px 12px; margin: 5px 0; cursor: pointer; }
-    .product { border: 1px solid #ccc; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; }
-    .product img { width: 80px; height: 80px; object-fit: cover; margin-right: 10px; }
-    .product-details { flex: 1; }
-    .product-name { font-weight: bold; font-size: 18px; }
-    .product-info { font-size: 14px; color: #555; }
-    .cart-btn { background-color: #28a745; color: white; border: none; }
-    .cart-btn:hover { background-color: #218838; }
-    #cartPage { display: none; }
-    .copy-btn { margin-left: 10px; }
+    
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9f9f9;
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+  color: #333;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+input[type="text"] {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+input[type="text"]:focus {
+  border-color: #2980b9;
+  outline: none;
+}
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background-color: #2980b9;
+  color: white;
+  transition: background-color 0.3s;
+}
+button:hover {
+  background-color: #1c5980;
+}
+.product {
+  display: flex;
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  align-items: center;
+}
+.product img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+.product-details {
+  flex: 1;
+}
+.product-name {
+  font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.product-info {
+  font-size: 14px;
+  color: #666;
+  margin: 3px 0;
+}
+.cart-btn {
+  background-color: #27ae60;
+  flex-shrink: 0;
+  padding: 8px 14px;
+}
+.cart-btn:hover {
+  background-color: #1e874b;
+}
+
   </style>
 </head>
 <body>
@@ -215,3 +282,4 @@ duct.volume}</div>
 
 </body>
 </html>
+
