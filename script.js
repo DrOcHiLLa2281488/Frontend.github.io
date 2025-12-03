@@ -436,6 +436,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ============================================
+// ДОПОЛНИТЕЛЬНАЯ ФУНКЦИЯ В script.js
+// ============================================
+
+// Добавьте в функцию initTelegramApp():
+async function checkAdminStatus() {
+    if (!currentUser?.id) return false;
+    
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=CHECK_ADMIN&user_id=${currentUser.id}`);
+        const data = await response.json();
+        return data.isAdmin || false;
+    } catch (error) {
+        console.error('Ошибка проверки админа:', error);
+        return false;
+    }
+}
+
+// Можно добавить кнопку админа в интерфейс
+async function setupAdminFeatures() {
+    const isAdmin = await checkAdminStatus();
+    
+    if (isAdmin) {
+        // Добавляем скрытую кнопку админа
+        const adminBtn = document.createElement('button');
+        adminBtn.className = 'admin-btn';
+        adminBtn.innerHTML = '⚙️ Админ';
+        adminBtn.style.position = 'fixed';
+        adminBtn.style.top = '10px';
+        adminBtn.style.right = '10px';
+        adminBtn.style.zIndex = '10000';
+        adminBtn.style.padding = '8px 12px';
+        adminBtn.style.background = '#ff6b6b';
+        adminBtn.style.color = 'white';
+        adminBtn.style.border = 'none';
+        adminBtn.style.borderRadius = '20px';
+        adminBtn.style.cursor = 'pointer';
+        
+        adminBtn.addEventListener('click', () => {
+            TelegramWebApp.openTelegramLink(`https://t.me/${bot_username}?start=admin`);
+        });
+        
+        document.body.appendChild(adminBtn);
+    }
+}
+
+// И вызовите в initTelegramApp():
+async function initTelegramApp() {
+    TelegramWebApp = window.Telegram.WebApp;
+    TelegramWebApp.expand();
+    currentUser = TelegramWebApp.initDataUnsafe.user;
+    
+    console.log('Пользователь:', currentUser);
+    
+    // Проверяем админ-права
+    await setupAdminFeatures();
+    
+    loadProducts();
+    loadCart();
+    setupEventListeners();
+    showShopPage();
+}
+
 // Убедитесь, что функции доступны глобально
 window.copyProductData = copyProductData;
 window.removeFromCart = removeFromCart;
