@@ -37,26 +37,30 @@
         </div>
 
         <!-- Корзина (скрыта по умолчанию) -->
-        <div id="cartPage" class="cart-page" style="display: none;">
-            <div class="cart-header">
-                <h2>🛒 Ваша корзина</h2>
-                <button id="backToShop" class="back-btn">← Назад в магазин</button>
-            </div>
-            
-            <div id="cartItems" class="cart-items">
-                <!-- Товары в корзине появятся здесь -->
-                <div class="empty-cart">Корзина пуста</div>
-            </div>
-            
-            <div class="cart-footer">
-                <button id="copyAllBtn" class="btn-secondary">
-                    📋 Скопировать весь заказ
-                </button>
-                <button id="checkoutBtn" class="btn-primary">
-                    💬 Оформить заказ у менеджера
-                </button>
-            </div>
+        
+<div id="cartPage" class="cart-page" style="display: none;">
+    <div class="cart-header">
+        <h2>🛒 Ваша корзина</h2>
+        <button id="backToShop" class="back-btn">← Назад в магазин</button>
+    </div>
+    
+    <!-- Оберните товары в скроллируемый контейнер -->
+    <div class="cart-scroll-container">
+        <div id="cartItems" class="cart-items">
+            <!-- Товары в корзине появятся здесь -->
+            <div class="empty-cart">Корзина пуста</div>
         </div>
+    </div>
+    
+    <div class="cart-footer">
+        <button id="copyAllBtn" class="btn-secondary">
+            📋 Скопировать весь заказ
+        </button>
+        <button id="checkoutBtn" class="btn-primary">
+            💬 Оформить заказ у менеджера
+        </button>
+    </div>
+</div>
 
         <!-- Нижнее меню -->
         <nav class="bottom-nav">
@@ -100,6 +104,7 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
