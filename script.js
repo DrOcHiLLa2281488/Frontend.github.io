@@ -2,7 +2,7 @@
 // КОНФИГУРАЦИЯ
 // ============================================
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycby_Sep5e52Fzzn3qhY4CwMs4RxIIufHX4DnwP8cgTRZCwYGAhA2Fgq60yMaHsAqNGvJPQ/exec', // Вставьте сюда URL из шага 1.5
+    API_URL: 'https://script.google.com/macros/s/AKfycby_Sep5e52Fzzn3qhY4CwMs4RxIIufHX4DnwP8cgTRZCwYGAhA2Fgq60yMaHsAqNGvJPQ/exec',
     MANAGER_USERNAME: '@parfumdepo'
 };
 
@@ -44,68 +44,49 @@ function initTelegramApp() {
 }
 
 // ============================================
-// 2. РАБОТА С API (Google Sheets)
+// 2. РАБОТА С API (Google Sheets) - ЧИСТАЯ ВЕРСИЯ
 // ============================================
 
-// Загрузить все товары - ПРОСТАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
+// Загрузить все товары из базы данных
 async function loadProducts() {
     try {
         showLoading(true);
-        console.log('Начинаю загрузку товаров с URL:', CONFIG.API_URL);
         
+        console.log('Загружаю товары из базы данных...');
         const response = await fetch(`${CONFIG.API_URL}?sheet=Products`);
-        console.log('Получен ответ, статус:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ошибка: ${response.status}`);
+        }
         
         const data = await response.json();
-        console.log('Данные от API:', data);
         
         if (data.success) {
-            // Просто используем данные как есть
+            // Используем данные из Google Sheets
             products = data.data || [];
             
-            // Добавляем ID если его нет
+            // Убедимся, что у каждого товара есть id
             products.forEach((product, index) => {
-                if (!product.id) product.id = index + 1;
+                if (!product.id) {
+                    product.id = index + 1; // Генерируем id на основе позиции
+                }
             });
             
-            console.log('Товары загружены:', products);
+            console.log(`Успешно загружено ${products.length} товаров`);
+            
+            if (products.length === 0) {
+                showError('Каталог товаров пуст. Добавьте товары в Google Sheets.');
+                return;
+            }
+            
             filteredProducts = [...products];
             renderProducts();
-            
-            // Отладочная информация
-            if (products.length > 0) {
-                console.log('Первый товар:', products[0]);
-                console.log('Ключи первого товара:', Object.keys(products[0]));
-            }
         } else {
-            throw new Error(data.error || 'Неизвестная ошибка API');
+            throw new Error(data.error || 'Ошибка при загрузке данных');
         }
     } catch (error) {
         console.error('Ошибка загрузки товаров:', error);
-        
-        // Показываем тестовые данные для отладки
-        console.log('Использую тестовые данные...');
-        products = [
-            {
-                id: 1,
-                name: "Creed Aventus",
-                concentration: "Eau de Parfum",
-                volume: "100 ml",
-                price: 25000,
-                image_url: "https://de-parfum.ru/upload/amman_optimizer/jpg_weibo/800_upload/fibios/108v-CREED_Aventus_50_weibo"
-            },
-            {
-                id: 2,
-                name: "Dior Sauvage",
-                concentration: "Eau de Toilette",
-                volume: "60 ml",
-                price: 8000,
-                image_url: "https://odekolon-shop.ru/images/cache.catalog/christianzhorsauvagesau/departium72564224-87/06/70.png"
-            }
-        ];
-        
-        filteredProducts = [...products];
-        renderProducts();
+        showError('Не удалось загрузить каталог. Проверьте подключение к интернету.');
     } finally {
         showLoading(false);
     }
@@ -114,22 +95,27 @@ async function loadProducts() {
 // Получить корзину пользователя
 async function loadCart() {
     if (!currentUser?.id) {
-        console.log('Нет user_id, пропускаю загрузку корзины');
+        console.log('Пользователь не идентифицирован, создаем временную корзину');
+        cart = [];
+        updateCartUI();
         return;
     }
     
     try {
-        console.log('Загружаю корзину для user_id:', currentUser.id);
+        console.log('Загружаю корзину для пользователя:', currentUser.id);
         const response = await fetch(
             `${CONFIG.API_URL}?sheet=Carts&user_id=${currentUser.id}`
         );
         
         const data = await response.json();
-        console.log('Данные корзины:', data);
         
         if (data.success) {
             cart = data.data || [];
+            console.log('Корзина загружена:', cart);
             updateCartUI();
+        } else {
+            console.warn('Ошибка загрузки корзины:', data.error);
+            cart = [];
         }
     } catch (error) {
         console.error('Ошибка загрузки корзины:', error);
@@ -140,13 +126,12 @@ async function loadCart() {
 // Сохранить корзину на сервер
 async function saveCart() {
     if (!currentUser?.id) {
-        console.log('Нет user_id, пропускаю сохранение корзины');
+        console.log('Невозможно сохранить корзину: пользователь не идентифицирован');
         return;
     }
     
     try {
-        console.log('Сохраняю корзину для user_id:', currentUser.id, 'данные:', cart);
-        
+        console.log('Сохраняю корзину...');
         const response = await fetch(CONFIG.API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -158,7 +143,11 @@ async function saveCart() {
         });
         
         const result = await response.json();
-        console.log('Результат сохранения:', result);
+        if (result.success) {
+            console.log('Корзина успешно сохранена');
+        } else {
+            console.error('Ошибка сохранения корзины:', result.error);
+        }
     } catch (error) {
         console.error('Ошибка сохранения корзины:', error);
     }
@@ -184,13 +173,14 @@ function renderProducts() {
     
     container.innerHTML = filteredProducts.map(product => `
         <div class="product-card" data-id="${product.id}">
-            <img src="${product.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+            <img src="${getImageUrl(product.image_url)}" 
                  alt="${product.name}" 
-                 class="product-image">
+                 class="product-image"
+                 onerror="this.src='https://via.placeholder.com/300x200?text=Нет+фото'">
             <div class="product-info">
                 <div class="product-name">${product.name}</div>
                 <div class="product-details">
-                    ${product.concentration} • ${product.volume}
+                    ${product.concentration || ''} ${product.concentration && product.volume ? '•' : ''} ${product.volume || ''}
                 </div>
                 <div class="product-price">
                     ${formatPrice(product.price)} ₽
@@ -201,40 +191,64 @@ function renderProducts() {
     
     // Добавляем обработчики клика на товары
     document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            // Проверяем, что клик не по кнопке внутри карточки
+            if (e.target.tagName === 'BUTTON') return;
+            
             const productId = parseInt(card.dataset.id);
             const product = products.find(p => p.id === productId);
-            if (product) openProductModal(product);
+            if (product) {
+                openProductModal(product);
+            }
         });
     });
 }
 
+// Получить корректный URL изображения
+function getImageUrl(url) {
+    if (!url) return 'https://via.placeholder.com/300x200?text=Нет+фото';
+    
+    // Убираем лишние пробелы
+    url = url.trim();
+    
+    // Проверяем, начинается ли с http
+    if (!url.startsWith('http')) {
+        return 'https://via.placeholder.com/300x200?text=Нет+фото';
+    }
+    
+    return url;
+}
+
 // Открыть модальное окно товара
 function openProductModal(product) {
+    if (!product) return;
+    
     currentModalProduct = product;
     currentQuantity = 1;
     
-    document.getElementById('modalImage').src = 
-        product.image_url || 'https://via.placeholder.com/300x200?text=No+Image';
+    document.getElementById('modalImage').src = getImageUrl(product.image_url);
     document.getElementById('modalName').textContent = product.name;
-    document.getElementById('modalConcentration').textContent = product.concentration;
-    document.getElementById('modalVolume').textContent = product.volume;
+    document.getElementById('modalConcentration').textContent = product.concentration || '';
+    document.getElementById('modalVolume').textContent = product.volume || '';
     document.getElementById('modalPrice').textContent = formatPrice(product.price) + ' ₽';
     document.getElementById('currentQty').textContent = currentQuantity;
     
+    // Показываем модальное окно
     document.getElementById('productModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
 // Закрыть модальное окно
 function closeProductModal() {
     document.getElementById('productModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
     currentModalProduct = null;
 }
 
 // Обновить отображение корзины
 function updateCartUI() {
     // Обновляем счетчик внизу
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     document.getElementById('cartCount').textContent = totalItems;
     
     // Рендерим товары в корзине
@@ -250,21 +264,47 @@ function updateCartUI() {
         return;
     }
     
-    container.innerHTML = cart.map(item => {
+    // Фильтруем только существующие товары
+    const validCartItems = cart.filter(item => {
+        const product = products.find(p => p.id === item.id);
+        return product !== undefined;
+    });
+    
+    // Если после фильтрации корзина пуста, обновляем
+    if (validCartItems.length === 0) {
+        cart = [];
+        saveCart();
+        container.innerHTML = `
+            <div class="empty-cart">
+                🛒 Корзина пуста<br>
+                <small>Добавьте товары из каталога</small>
+            </div>
+        `;
+        return;
+    }
+    
+    // Если есть невалидные товары, обновляем корзину
+    if (validCartItems.length !== cart.length) {
+        cart = validCartItems;
+        saveCart();
+    }
+    
+    container.innerHTML = validCartItems.map(item => {
         const product = products.find(p => p.id === item.id);
         if (!product) return '';
         
-        const total = product.price * item.quantity;
+        const quantity = item.quantity || 1;
+        const total = product.price * quantity;
         
         return `
             <div class="cart-item" data-id="${product.id}">
                 <div class="cart-item-info">
                     <h4>${product.name}</h4>
                     <div class="cart-item-details">
-                        ${product.concentration} • ${product.volume}
+                        ${product.concentration || ''} ${product.concentration && product.volume ? '•' : ''} ${product.volume || ''}
                     </div>
                     <div class="product-price">
-                        ${formatPrice(product.price)} ₽ × ${item.quantity} = 
+                        ${formatPrice(product.price)} ₽ × ${quantity} = 
                         <strong>${formatPrice(total)} ₽</strong>
                     </div>
                 </div>
@@ -289,11 +329,13 @@ function updateCartUI() {
 function addToCart() {
     if (!currentModalProduct) return;
     
-    const existingItem = cart.find(item => item.id === currentModalProduct.id);
+    const existingItemIndex = cart.findIndex(item => item.id === currentModalProduct.id);
     
-    if (existingItem) {
-        existingItem.quantity += currentQuantity;
+    if (existingItemIndex !== -1) {
+        // Увеличиваем количество существующего товара
+        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + currentQuantity;
     } else {
+        // Добавляем новый товар
         cart.push({
             id: currentModalProduct.id,
             quantity: currentQuantity
@@ -305,7 +347,7 @@ function addToCart() {
     closeProductModal();
     
     // Показываем уведомление
-    showNotification(`Добавлено в корзину: ${currentModalProduct.name}`);
+    showNotification(`✅ Добавлено в корзину: ${currentModalProduct.name} (${currentQuantity} шт.)`);
 }
 
 // Удалить товар из корзины
@@ -313,6 +355,7 @@ function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     saveCart();
     updateCartUI();
+    showNotification('🗑️ Товар удален из корзины');
 }
 
 // Скопировать данные товара
@@ -322,64 +365,88 @@ function copyProductData(productId) {
     
     const text = `
 ${product.name}
-Концентрация: ${product.concentration}
-Объем: ${product.volume}
+Концентрация: ${product.concentration || 'не указана'}
+Объем: ${product.volume || 'не указан'}
 Цена: ${formatPrice(product.price)} ₽
-Ссылка: ${window.location.origin}?product=${productId}
     `.trim();
     
     navigator.clipboard.writeText(text)
-        .then(() => showNotification('Данные скопированы в буфер!'))
-        .catch(() => showNotification('Ошибка копирования'));
+        .then(() => showNotification('📋 Данные товара скопированы!'))
+        .catch(() => showNotification('❌ Ошибка копирования'));
 }
 
 // Скопировать весь заказ
 function copyAllOrder() {
     if (cart.length === 0) {
-        showNotification('Корзина пуста!');
+        showNotification('❌ Корзина пуста!');
         return;
     }
     
-    let text = `ЗАКАЗ #${Date.now()}\n\n`;
+    let text = `=== ЗАКАЗ ИЗ PARFUMDEPO ===\n\n`;
     let total = 0;
     
     cart.forEach(item => {
         const product = products.find(p => p.id === item.id);
         if (!product) return;
         
-        const itemTotal = product.price * item.quantity;
+        const quantity = item.quantity || 1;
+        const itemTotal = product.price * quantity;
         total += itemTotal;
         
-        text += `
-${product.name}
-${product.concentration} • ${product.volume}
-${item.quantity} × ${formatPrice(product.price)} ₽ = ${formatPrice(itemTotal)} ₽
--------------------------
-        `.trim() + '\n';
+        text += `🏷️ ${product.name}\n`;
+        if (product.concentration) text += `   Концентрация: ${product.concentration}\n`;
+        if (product.volume) text += `   Объем: ${product.volume}\n`;
+        text += `   ${quantity} × ${formatPrice(product.price)} ₽ = ${formatPrice(itemTotal)} ₽\n`;
+        text += `   -----------------\n`;
     });
     
-    text += `\nИТОГО: ${formatPrice(total)} ₽`;
-    text += `\n\nПользователь: ${currentUser?.first_name || 'Неизвестно'}`;
-    text += `\nTelegram: @${currentUser?.username || 'скрыт'}`;
+    text += `\n💰 ИТОГО: ${formatPrice(total)} ₽\n`;
+    text += `\n👤 Пользователь: ${currentUser?.first_name || 'Неизвестно'}`;
+    if (currentUser?.username) text += `\n📱 Telegram: @${currentUser.username}`;
+    text += `\n\n📅 Дата: ${new Date().toLocaleString('ru-RU')}`;
     
     navigator.clipboard.writeText(text)
-        .then(() => showNotification('Весь заказ скопирован!'))
-        .catch(() => showNotification('Ошибка копирования'));
+        .then(() => showNotification('📋 Весь заказ скопирован!'))
+        .catch(() => showNotification('❌ Ошибка копирования'));
 }
 
 // Оформить заказ
 function checkout() {
     if (cart.length === 0) {
-        showNotification('Добавьте товары в корзину!');
+        showNotification('❌ Добавьте товары в корзину!');
         return;
     }
     
     // Сохраняем корзину перед переходом
     saveCart();
     
+    // Создаем текст заказа
+    let orderText = `Здравствуйте! Хочу оформить заказ:\n\n`;
+    let total = 0;
+    
+    cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (!product) return;
+        
+        const quantity = item.quantity || 1;
+        const itemTotal = product.price * quantity;
+        total += itemTotal;
+        
+        orderText += `• ${product.name}`;
+        if (product.concentration) orderText += ` (${product.concentration})`;
+        if (product.volume) orderText += `, ${product.volume}`;
+        orderText += ` - ${quantity} шт. × ${formatPrice(product.price)} ₽ = ${formatPrice(itemTotal)} ₽\n`;
+    });
+    
+    orderText += `\nИтого: ${formatPrice(total)} ₽`;
+    orderText += `\n\nОт пользователя: ${currentUser?.first_name || 'Неизвестно'}`;
+    if (currentUser?.username) orderText += ` (@${currentUser.username})`;
+    
+    // Кодируем текст для URL
+    const encodedText = encodeURIComponent(orderText);
+    
     // Открываем чат с менеджером
-    const message = encodeURIComponent(`Привет! Хочу оформить заказ из мини-приложения.`);
-    const url = `https://t.me/${CONFIG.MANAGER_USERNAME.replace('@', '')}?start=${currentUser?.id || '0'}`;
+    const url = `https://t.me/${CONFIG.MANAGER_USERNAME.replace('@', '')}?text=${encodedText}`;
     
     TelegramWebApp.openTelegramLink(url);
 }
@@ -395,10 +462,11 @@ function searchProducts(query) {
     if (!searchTerm) {
         filteredProducts = [...products];
     } else {
-        filteredProducts = products.filter(product =>
-            product.name.toLowerCase().includes(searchTerm) ||
-            product.concentration.toLowerCase().includes(searchTerm)
-        );
+        filteredProducts = products.filter(product => {
+            const name = product.name?.toLowerCase() || '';
+            const concentration = product.concentration?.toLowerCase() || '';
+            return name.includes(searchTerm) || concentration.includes(searchTerm);
+        });
     }
     
     sortProducts();
@@ -417,7 +485,8 @@ function sortProducts() {
     
     // Обновляем текст кнопки
     const btn = document.getElementById('sortButton');
-    btn.textContent = `Фильтр: По цене ${sortDirection === 'asc' ? '↑' : '↓'}`;
+    const directionIcon = sortDirection === 'asc' ? '↑' : '↓';
+    btn.textContent = `Фильтр: По цене ${directionIcon}`;
 }
 
 // Переключить сортировку
@@ -449,13 +518,14 @@ function showCartPage() {
 // ============================================
 
 function formatPrice(price) {
-    return parseInt(price).toLocaleString('ru-RU');
+    const num = parseFloat(price) || 0;
+    return num.toLocaleString('ru-RU');
 }
 
 function showLoading(show) {
     const catalog = document.getElementById('catalog');
     if (show) {
-        catalog.innerHTML = '<div class="loading">Загрузка...</div>';
+        catalog.innerHTML = '<div class="loading">⌛ Загрузка...</div>';
     }
 }
 
@@ -464,13 +534,18 @@ function showError(message) {
     catalog.innerHTML = `
         <div class="empty-cart">
             ⚠️ Ошибка<br>
-            <small>${message}</small>
+            <small>${message}</small><br>
+            <small>Попробуйте обновить страницу</small>
         </div>
     `;
 }
 
 function showNotification(message) {
-    TelegramWebApp.showAlert(message);
+    if (TelegramWebApp) {
+        TelegramWebApp.showAlert(message);
+    } else {
+        alert(message); // Для отладки в браузере
+    }
 }
 
 // ============================================
@@ -527,9 +602,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // Режим разработки (браузер)
         console.log('Режим разработки: инициализация без Telegram');
-        currentUser = { id: 99999, first_name: 'Тест', username: 'test_user' };
+        currentUser = { 
+            id: Math.floor(Math.random() * 1000000), 
+            first_name: 'Тестовый', 
+            username: 'test_user' 
+        };
         loadProducts();
         setupEventListeners();
         showShopPage();
     }
 });
+
+// Делаем функции глобальными для обработчиков onclick в HTML
+window.copyProductData = copyProductData;
+window.removeFromCart = removeFromCart;
