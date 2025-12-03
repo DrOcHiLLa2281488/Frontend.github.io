@@ -121,6 +121,21 @@ async function saveCart() {
         console.error('Ошибка сохранения корзины:', error);
     }
 }
+// Добавьте эту функцию в script.js и вызовите после загрузки данных
+
+function debugProducts() {
+    console.log('Структура данных первого товара:', products[0]);
+    console.log('Все доступные ключи:', Object.keys(products[0] || {}));
+    
+    // Выводим все товары в консоль для проверки
+    products.forEach((product, index) => {
+        console.log(`Товар ${index + 1}:`, product);
+    });
+}
+
+// Вызовите эту функцию после загрузки товаров:
+// В функции loadProducts после products = data.data.map(...) добавьте:
+debugProducts();
 
 // ============================================
 // 3. РЕНДЕРИНГ ИНТЕРФЕЙСА
