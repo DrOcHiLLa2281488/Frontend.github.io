@@ -16,8 +16,6 @@ body {
 #app {
     padding: 16px;
     padding-bottom: 80px;
-    min-height: 100vh;
-    position: relative;
 }
 
 /* Заголовок */
@@ -80,8 +78,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
-    margin-bottom: 100px; /* Отступ для нижнего меню */
-    min-height: 400px;
+    margin-bottom: 20px;
 }
 
 .product-card {
@@ -132,16 +129,9 @@ body {
     font-size: 18px;
 }
 
+/* Корзина */
 .cart-page {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #f8f9fa;
-    z-index: 1000;
-    overflow-y: auto; /* Добавьте это */
-    padding-bottom: 140px; /* Место для кнопок */
+    animation: fadeIn 0.3s;
 }
 
 .cart-header {
@@ -188,25 +178,7 @@ body {
     display: flex;
     gap: 8px;
 }
-/*УБЛЮДКИ ТУТ*/
-.cart-items {
-    min-height: 300px;
-    max-height: calc(100vh - 250px); /* Ограничиваем высоту */
-    overflow-y: auto; /* Добавляем скролл */
-    margin-bottom: 120px; /* Отступ для кнопок */
-}
 
-.cart-scroll-container {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* Для iOS */
-    padding: 0 16px;
-}
-
-.cart-items {
-    padding-bottom: 20px;
-}
-/* ТУТ КОНЕЦ*/
 .copy-btn, .remove-btn {
     padding: 8px 12px;
     border-radius: 8px;
@@ -227,14 +199,16 @@ body {
 
 .cart-footer {
     position: fixed;
-    bottom: 60px; /* Выше чем нижнее меню */
-    left: 0;
-    right: 0;
+    bottom: 60px;
+    left: 16px;
+    right: 16px;
     background: white;
     padding: 16px;
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* Кнопки */
