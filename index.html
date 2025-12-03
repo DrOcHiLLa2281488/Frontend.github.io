@@ -2,434 +2,102 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Магазин парфюмерии</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f0f4f8;
-    color: #333;
-  }
-  h1 {
-    margin-bottom: 15px;
-  }
-  #search {
-    padding: 10px;
-    width: 100%;
-    max-width: 400px;
-    border: 1px solid #bbb;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    font-size: 16px;
-  }
-  .product-list, .cart-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  .product {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 220px;
-    padding: 15px;
-    box-sizing: border-box;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
-  }
-  .product:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  }
-  .product img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 10px;
-  }
-  .product h3 {
-    font-size: 18px;
-    margin: 0 0 8px;
-  }
-  .product p {
-    font-weight: bold;
-    margin: 0 0 12px;
-    color: #0073e6;
-  }
-  .product button {
-    background-color: #0073e6;
-    color: white;
-    border: none;
-    padding: 9px 14px;
-    width: 100%;
-    font-size: 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .product button:hover {
-    background-color: #005bb5;
-  }
-  #cart {
-    background: #fff;
-    margin-top: 40px;
-    max-width: 480px;
-    border-radius: 8px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  }
-  #cart h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-  }
-  #cart-items {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-  }
-  .cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
-    margin-bottom: 12px;
-  }
-  .cart-item span {
-    flex: 1 1 auto;
-  }
-  .cart-item button {
-    background: #d9534f;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    padding: 4px 9px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-left: 5px;
-    transition: background-color 0.3s ease;
-  }
-  .cart-item button:hover {
-    background: #c12e2a;
-  }
-  .cart-controls button {
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
-    padding: 0;
-    margin-left: 5px;
-  }
-  #cart-total {
-    font-weight: 600;
-    font-size: 18px;
-    margin-bottom: 20px;
-    text-align: right;
-    color: #333;
-  }
-  #checkout-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    width: 100%;
-    padding: 12px;
-    font-size: 17px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #checkout-btn:disabled {
-    background-color: #94d3a2;
-    cursor: default;
-  }
-  #checkout-btn:hover:not(:disabled) {
-    background-color: #1e7e34;
-  }
-  #order-form {
-    max-width: 480px;
-    background: #fff;
-    margin-top: 30px;
-    padding: 25px 25px 30px;
-    border-radius: 8px;
-    border: 1px solid #bbb;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    display: none;
-  }
-  #order-form h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-  }
-  #order-form label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 600;
-  }
-  #order-form input, #order-form textarea {
-    margin-top: 6px;
-    padding: 10px;
-    width: 100%;
-    font-size: 15px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    font-family: inherit;
-    resize: vertical;
-  }
-  #order-form button {
-    margin-top: 24px;
-    width: 100%;
-    font-size: 17px;
-    background-color: #0073e6;
-    color: white;
-    border: none;
-    padding: 12px;
-    bor
-der-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #order-form button:hover {
-    background-color: #005bb5;
-  }
-  #empty-msg {
-    color: #666;
-    font-style: italic;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParfumDEPO - Магазин парфюмерии</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- Главный экран -->
+    <div id="app">
+        <!-- Заголовок магазина -->
+        <header class="header">
+            <h1>ParfumDEPO</h1>
+            <div class="subtitle">Элитная парфюмерия с доставкой</div>
+        </header>
 
-<h1>Магазин парфюмерии</h1>
-
-<input type="text" id="search" placeholder="Поиск по товарам..." autocomplete="off" />
-
-<div id="catalog" class="product-list"></div>
-
-<section id="cart">
-  <h2>Корзина</h2>
-  <div id="cart-items"></div>
-  <div id="cart-total"></div>
-  <button id="checkout-btn" disabled>Оформить заказ</button>
-</section>
-
-<form id="order-form" novalidate>
-  <h2>Оформление заказа</h2>
-  <label for="name">Имя<span style="color:red;"> *</span></label>
-  <input type="text" id="name" required minlength="2" placeholder="Ваше имя" />
-
-  <label for="phone">Телефон<span style="color:red;"> *</span></label>
-  <input type="tel" id="phone" required pattern="^\+?\d{7,15}$" placeholder="+7XXXXXXXXXX" />
-
-  <label for="address">Адрес доставки<span style="color:red;"> *</span></label>
-  <textarea id="address" rows="3" required minlength="5" placeholder="Улица, дом, квартира"></textarea>
-
-  <button type="submit">Отправить заказ</button>
-</form>
-
-<script>
-  const products = [
-    {
-      id: 1,
-      name: 'Chanel Bleu De Parfum',
-      price: 5000,
-      image: 'https://i.imgur.com/7t3xoJX.jpg'
-    },
-    {
-      id: 2,
-      name: 'Dior Sauvage',
-      price: 4500,
-      image: 'https://i.imgur.com/Q0y3upA.jpg'
-    },
-    {
-      id: 3,
-      name: 'Versace Eros',
-      price: 4000,
-      image: 'https://i.imgur.com/1tb2mvL.jpg'
-    },
-    {
-      id: 4,
-      name: 'Tom Ford Black Orchid',
-      price: 6500,
-      image: 'https://i.imgur.com/kn9wrBo.jpg'
-    },
-    {
-      id: 5,
-      name: 'Gucci Bloom',
-      price: 3800,
-      image: 'https://i.imgur.com/kDfnG1F.jpg'
-    }
-  ];
-
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-  const catalogEl = document.getElementById('catalog');
-  const searchEl = document.getElementById('search');
-  const cartItemsEl = document.getElementById('cart-items');
-  const cartTotalEl = document.getElementById('cart-total');
-  const checkoutBtn = document.getElementById('checkout-btn');
-  const orderForm = document.getElementById('order-form');
-
-  function renderCatalog(filter = '') {
-    catalogEl.innerHTML = '';
-    const filtered = products.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
-    if (filtered.length === 0) {
-      catalogEl.innerHTML = '<p id="empty-msg">Товары не найдены.</p>';
-      return;
-    }
-    filtered.forEach(product => {
-      const div = document.createElement('div');
-      div.className = 'product';
-      div.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/220x150?text=Нет+изображения';" />
-        <h3>${product.name}</h3>
-        <p>${product.price.toLocaleString('ru-RU')} ₽</p>
-        <button data-id="${product.id}">Добавить в корзину</button>
-      `;
-      catalogEl.appendChild(div);
-    });
-
-    catalogEl.querySelectorAl
-l('button').forEach(btn => {
-      btn.onclick = () => {
-        addToCart(+btn.dataset.id);
-      };
-    });
-  }
-
-  function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }
-
-  function renderCart() {
-    cartItemsEl.innerHTML = '';
-    if (cart.length === 0) {
-      cartItemsEl.innerHTML = '<p id="empty-msg">Корзина пуста.</p>';
-      cartTotalEl.textContent = '';
-      checkoutBtn.disabled = true;
-      return;
-    }
-
-    let total = 0;
-    cart.forEach(item => {
-      total += item.price * item.qty;
-      const itemEl = document.createElement('div');
-      itemEl.className = 'cart-item';
-
-      itemEl.innerHTML = `
-        <span>${item.name} x${item.qty} = ${(item.price * item.qty).toLocaleString('ru-RU')} ₽</span>
-        <div>
-          <button data-action="minus" data-id="${item.id}">−</button>
-          <button data-action="plus" data-id="${item.id}">+</button>
-          <button data-action="remove" data-id="${item.id}">×</button>
+        <!-- Поиск и фильтры -->
+        <div class="controls">
+            <input type="text" 
+                   id="searchInput" 
+                   placeholder="🔍 Поиск по названию..." 
+                   class="search-input">
+            
+            <button id="sortButton" class="sort-btn">
+                Фильтр: По цене ↑
+            </button>
         </div>
-      `;
-      cartItemsEl.appendChild(itemEl);
-    });
-    cartTotalEl.textContent = `Итого: ${total.toLocaleString('ru-RU')} ₽`;
-    checkoutBtn.disabled = false;
-  }
 
-  function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-    const item = cart.find(c => c.id === id);
-    if (item) {
-      item.qty++;
-    } else {
-      cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
-    }
-    saveCart();
-    renderCart();
-  }
+        <!-- Каталог товаров -->
+        <div id="catalog" class="catalog">
+            <!-- Товары будут загружаться сюда -->
+            <div class="loading">Загрузка каталога...</div>
+        </div>
 
-  function removeFromCart(id) {
-    cart = cart.filter(item => item.id !== id);
-    saveCart();
-    renderCart();
-  }
+        <!-- Корзина (скрыта по умолчанию) -->
+        <div id="cartPage" class="cart-page" style="display: none;">
+            <div class="cart-header">
+                <h2>🛒 Ваша корзина</h2>
+                <button id="backToShop" class="back-btn">← Назад в магазин</button>
+            </div>
+            
+            <div id="cartItems" class="cart-items">
+                <!-- Товары в корзине появятся здесь -->
+                <div class="empty-cart">Корзина пуста</div>
+            </div>
+            
+            <div class="cart-footer">
+                <button id="copyAllBtn" class="btn-secondary">
+                    📋 Скопировать весь заказ
+                </button>
+                <button id="checkoutBtn" class="btn-primary">
+                    💬 Оформить заказ у менеджера
+                </button>
+            </div>
+        </div>
 
-  function changeQty(id, delta) {
-    const item = cart.find(c => c.id === id);
-    if (!item) return;
-    item.qty += delta;
-    if (item.qty < 1) {
-      removeFromCart(id);
-      return;
-    }
-    saveCart();
-    renderCart();
-  }
+        <!-- Нижнее меню -->
+        <nav class="bottom-nav">
+            <button id="shopTab" class="nav-btn active">
+                🏪 Магазин
+            </button>
+            <button id="cartTab" class="nav-btn">
+                🛒 Корзина (<span id="cartCount">0</span>)
+            </button>
+        </nav>
+    </div>
 
-  cartItemsEl.onclick = (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const id = +e.target.dataset.id;
-    const action = e.target.dataset.action;
-    if (action === 'plus') changeQty(id, 1);
-    if (action === 'minus') changeQty(id, -1);
-    if (action === 'remove') removeFromCart(id);
-  };
+    <!-- Модальное окно товара -->
+    <div id="productModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Фото парфюма">
+            <h3 id="modalName"></h3>
+            <div class="modal-details">
+                <div id="modalConcentration"></div>
+                <div id="modalVolume"></div>
+                <div id="modalPrice" class="price"></div>
+            </div>
+            
+            <div class="quantity-controls">
+                <button id="decreaseQty">−</button>
+                <span id="currentQty">1</span>
+                <button id="increaseQty">+</button>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="addToCartBtn" class="btn-primary">
+                    Добавить в корзину
+                </button>
+                <button id="closeModal" class="btn-secondary">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
 
-  searchEl.addEventListener('input', () => {
-    renderCatalog(searchEl.value);
-  });
-
-  checkoutBtn.onclick = () => {
-    orderForm.style.display = 'block';
-    orderForm.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  orderForm.addEventListener('submit', e => {
-    e.preventDefault();
-
-    const name = orderForm.name.value.trim();
-    const phone = orderForm.phone.value.trim();
-    const address = orderForm.address.value.trim();
-
-    if (name.length < 2) {
-      alert('Введите корректное имя (не менее 2 символов).');
-      orderForm.name.focus();
-      return;
-    }
-    const phonePattern = /^\+?\d{7,15}$/;
-    if (!phonePattern.test(phone)) {
-      alert('Введите корректный телефон в формате +7XXXXXXXXXX.');
-      orderForm.phone.focus();
-      return;
-    }
-    if (address.length < 5) {
-      alert('Введите полный адрес доставки (не менее 5 символов).');
-      orderForm.address.focus();
-      return;
-    }
-    if (cart.length === 0) {
-      alert('Корзина пуста. Добавьте товары.');
-      return;
-    }
-
-    let orderText = `Новый заказ\n\nИмя: ${name}\nТелефон: ${phone}\nАдрес: ${address}\n\nТовары:\n`;
-    cart.forEach(item => {
-      orderText += ` - ${item.name} x${item.qty} = ${(item.price * item.qty).toLocaleString('ru-RU')} ₽\n`;
-    });
-    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-    orderText += `\nИтог
-о: ${total.toLocaleString('ru-RU')} ₽`;
-
-    alert(orderText);
-
-    cart = [];
-    saveCart();
-    renderCart();
-    orderForm.reset();
-    orderForm.style.display = 'none';
-    checkoutBtn.disabled = true;
-  });
-
-  // Инициализация
-  renderCatalog();
-  renderCart();
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
 
